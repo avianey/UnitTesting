@@ -4,18 +4,26 @@
  */
 package fr.astek.internal.bean;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import org.hibernate.annotations.GenericGenerator;
 
 /**
  *
  * @author dlebert
  */
-public class Achat {
+
+@Entity
+public class Achat implements Serializable  {
     
     @Id
+    @GeneratedValue(generator="increment")
+    @GenericGenerator(name="increment", strategy = "increment")
     private long id;
     
     @Column

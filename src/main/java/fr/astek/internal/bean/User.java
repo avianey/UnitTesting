@@ -11,6 +11,8 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import org.hibernate.annotations.GenericGenerator;
 
 /**
@@ -18,6 +20,11 @@ import org.hibernate.annotations.GenericGenerator;
  * @author dlebert
  */
 @Entity
+@Table(
+    uniqueConstraints = {
+        @UniqueConstraint(columnNames={"login"})
+    }
+)
 public class User implements Serializable {
     
     public enum Role {
