@@ -72,14 +72,11 @@ public class ServiceToTest {
         } 
         
         if (result){
-            Iterator itClients = clients.iterator();
-            while (itClients.hasNext()){
-              
-              Client curClient = itClients.next();
-              if (em.find(Client.class, curClient) == null){
-                  
-                   System.out.println("ERREUR : Client non trouvé");
-              }
+            for (Client curClient : clients) {
+                if (em.find(Client.class, curClient.getId()) == null){
+                    
+                     System.out.println("ERREUR : Client non trouvé");
+                }
                 
                 
             }
