@@ -91,18 +91,21 @@ public class ServiceTest {
         Client ft = new Client();
         ft.setSiret("12345678912345");
         ft.setRaisonSociale("France Telecom");
+        ServiceToTest.createClient(ft);
         
         clients.add(ft);
         
         Client sncf = new Client();
         sncf.setSiret("12345678912345");
         sncf.setRaisonSociale("SNCF");
+        ServiceToTest.createClient(sncf);
         
         clients.add(sncf);
         
         Client random = new Client();
         random.setSiret("12345678912345");
         random.setRaisonSociale("RANDOM client");
+        ServiceToTest.createClient(random);
         
         clients.add(random);
        

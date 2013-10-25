@@ -5,6 +5,7 @@
 package fr.astek.internal.bean;
 
 import java.util.Collection;
+import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Id;
 
@@ -21,7 +22,7 @@ public class Commande {
     private long idClient;
     
     @Column
-    private double montant;
+    private Date date;
     
 
 
@@ -54,17 +55,18 @@ public class Commande {
     }
 
     /**
-     * @return the montant
+     * @return the date
      */
-    public double getMontant() {
-        return montant;
+    public Date getDate() {
+        return date;
     }
 
     /**
-     * @param montant the montant to set
+     * @param date the date to set
      */
-    public void setMontant(double montant) {
-        this.montant = montant;
+    public void setDate(Date date) {
+        this.date = date;
     }
+
 
 }

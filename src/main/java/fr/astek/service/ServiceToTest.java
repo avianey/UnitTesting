@@ -73,10 +73,18 @@ public class ServiceToTest {
         
         if (result){
             for (Client curClient : clients) {
+
                 if (em.find(Client.class, curClient.getId()) == null){
                     
                      System.out.println("ERREUR : Client non trouvé");
-                }
+                
+                } else{
+                    
+                    System.out.println(curClient.getRaisonSociale());
+                              
+                    
+                } 
+                
                 
                 
             }
