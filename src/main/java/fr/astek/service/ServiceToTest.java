@@ -81,18 +81,11 @@ public class ServiceToTest {
                 } else{
                     
                     System.out.println(curClient.getRaisonSociale());
-                              
-                    
+         
                 } 
-                
-                
-                
+   
             }
-            
 
-            
-            
-            
         }
         
         

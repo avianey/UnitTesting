@@ -4,6 +4,8 @@
  */
 package fr.astek.internal.bean;
 
+import java.util.Collection;
+import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Id;
 
@@ -11,13 +13,13 @@ import javax.persistence.Id;
  *
  * @author dlebert
  */
-public class LigneCommande {
+public class Achat {
     
     @Id
     private long id;
     
     @Column
-    private long idCommande;
+    private long idClient;
     
     @Column
     private String produit;
@@ -27,6 +29,8 @@ public class LigneCommande {
     
     @Column
     private double prixUnitaire;
+    
+
 
     /**
      * @return the id
@@ -43,17 +47,17 @@ public class LigneCommande {
     }
 
     /**
-     * @return the idCommande
+     * @return the idClient
      */
-    public long getIdCommande() {
-        return idCommande;
+    public long getIdClient() {
+        return idClient;
     }
 
     /**
-     * @param idCommande the idCommande to set
+     * @param idClient the idClient to set
      */
-    public void setIdCommande(long idCommande) {
-        this.idCommande = idCommande;
+    public void setIdClient(long idClient) {
+        this.idClient = idClient;
     }
 
     /**
@@ -97,11 +101,5 @@ public class LigneCommande {
     public void setPrixUnitaire(double prixUnitaire) {
         this.prixUnitaire = prixUnitaire;
     }
-    
 
-
-    
-    
-    
-    
 }
