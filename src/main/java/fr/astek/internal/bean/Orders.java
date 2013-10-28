@@ -11,15 +11,16 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Table;
 import org.hibernate.annotations.GenericGenerator;
 
 /**
  *
  * @author dlebert
  */
-
+@Table
 @Entity
-public class Achat implements Serializable  {
+public class Orders implements Serializable  {
     
     @Id
     @GeneratedValue(generator="increment")
@@ -30,13 +31,13 @@ public class Achat implements Serializable  {
     private long idClient;
     
     @Column
-    private String produit;
+    private String product;
     
     @Column
-    private int quantite;
+    private int quantity;
     
     @Column
-    private double prixUnitaire;
+    private double price;
     
 
 
@@ -69,45 +70,45 @@ public class Achat implements Serializable  {
     }
 
     /**
-     * @return the produit
+     * @return the product
      */
-    public String getProduit() {
-        return produit;
+    public String getProduct() {
+        return product;
     }
 
     /**
-     * @param produit the produit to set
+     * @param product the product to set
      */
-    public void setProduit(String produit) {
-        this.produit = produit;
+    public void setProduct(String product) {
+        this.product = product;
     }
 
     /**
-     * @return the quantite
+     * @return the quantity
      */
-    public int getQuantite() {
-        return quantite;
+    public int getQuantity() {
+        return quantity;
     }
 
     /**
-     * @param quantite the quantite to set
+     * @param quantity the quantity to set
      */
-    public void setQuantite(int quantite) {
-        this.quantite = quantite;
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
     }
 
     /**
-     * @return the prixUnitaire
+     * @return the price
      */
-    public double getPrixUnitaire() {
-        return prixUnitaire;
+    public double getPrice() {
+        return price;
     }
 
     /**
-     * @param prixUnitaire the prixUnitaire to set
+     * @param price the price to set
      */
-    public void setPrixUnitaire(double prixUnitaire) {
-        this.prixUnitaire = prixUnitaire;
+    public void setPrice(double price) {
+        this.price = price;
     }
 
 }

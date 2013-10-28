@@ -28,4 +28,12 @@ public class TechnicalException extends Exception {
         super(message, e);
     }
     
+    public TechnicalException(Exception e) {
+        super(e);
+    }
+    
+    public TechnicalException(String message, Exception e) {
+        super(message, e);
+    }
+    
 }

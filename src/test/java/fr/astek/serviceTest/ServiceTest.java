@@ -5,15 +5,16 @@
 package fr.astek.serviceTest;
 
 
-import fr.astek.internal.bean.Achat;
+import fr.astek.internal.bean.Orders;
 import fr.astek.internal.bean.Client;
 import fr.astek.internal.bean.User;
+import fr.astek.internal.error.BusinessException;
 import fr.astek.internal.error.TechnicalException;
 import fr.astek.service.ServiceToTest;
+
+
 import java.util.ArrayList;
 import java.util.Collection;
-import javax.persistence.PersistenceException;
-import javax.persistence.RollbackException;
 
 
 import org.junit.Assert;
@@ -34,37 +35,43 @@ public class ServiceTest {
         return u;
     }
     
+    private static final Client getPassingClient() {
+        Client client = new Client();
+        client.setSiret("12345678912345");
+        client.setRaisonSociale("France Telecom");
+        return client;
+    }
+    
     /**
      * Verify that the {@link ServiceToTest#createUser(fr.astek.internal.bean.User)} method behave properly
      * <ul>
-     * <li>rule 1 : The {@link User} parameter is not null</li>
-     * <li>rule 2 : The {@link User#getLogin()} verifies TODO</li>
-     * <li>rule 3 : The {@link User#getRole()} is not null</li>
-     * <li>rule 4 : An exception is thrown if the creation fails</li>
-     * <li>rule 5 : The returned {@link User#getId()} is not null is the creation is successfull</li>
-     * <li>rule 6 : the creation fails if a {@link User} with the same {@link User#getLogin()} already exists</li>
+     * <li>rule 1 : The returned {@link User#getId()} != 0 if the creation is successfull</li>
+     * <li>rule 2 : The {@link User} parameter can't be null</li>
+     * <li>rule 3 : The {@link User#getLogin()} verifies ^[a-z]{3,32}$</li>
+     * <li>rule 4 : The {@link User#getRole()} or {@link User#getLogin()} can't be null</li>
+     * <li>rule 5 : the creation fails if a {@link User} with the same {@link User#getLogin()} already exists</li>
      * </ul>
      */
     @Test
     public void testCreateUser() {
         
-        //User valid
+        // Rule 1 : Successfull creation return an id > 0
         User user = getPassingUser();
         user = ServiceToTest.createUser(user);
         Assert.assertNotNull("ServiceToTest.createUser with a valid user should create and return the user", user);
-        Assert.assertNotNull("ServiceToTest.createUser with a valid user should return a user.getId() not null", user.getId());
+        Assert.assertNotNull("ServiceToTest.createUser with a valid user should return a user.getId() > 0", user.getId());
         
    
-        //Rule 1 : {@link User} null 
+        // Rule 2 : user null 
         user = null;
         try{
             user = ServiceToTest.createUser(user);
         } catch(NullPointerException e){
             //ignore, this exception is expected.
         }
-        Assert.assertNull("rule 1", user);
+        Assert.assertNull("User parameter is null", user);
 
-        //Rule 2 : Login not matching ^[a-z]{3,32}$
+        // Rule 3 : Login not matching ^[a-z]{3,32}$
         user = getPassingUser();
         user.setLogin("TT@/%oOOo");
         
@@ -75,9 +82,20 @@ public class ServiceTest {
             //ignore, this exception is expected.
         }
         
-        Assert.assertEquals("User.getLogin not matching regex ^[a-z]{3,32}$ ", user.getId(), 0);
+        Assert.assertEquals("User.getLogin not matching regex ^[a-z]{3,32}$ ", 0, user.getId());
         
-        //Rule 3 : The {@link User#getRole()} is not null
+        // Rule 4 : The login is null
+        user = getPassingUser();
+        user.setLogin(null);
+        try{
+            user = ServiceToTest.createUser(user);
+              
+        } catch(NullPointerException e){
+            //ignore, this exception is expected.
+        }
+        Assert.assertEquals("User.getLogin is null", 0, user.getId());
+        
+        // Rule 4 : The role is null
         user = getPassingUser();
         user.setRole(null);
         try{
@@ -86,55 +104,120 @@ public class ServiceTest {
         } catch(NullPointerException e){
             //ignore, this exception is expected.
         }
-        
         Assert.assertEquals("User.getRole is null ", user.getId(), 0);
 
-        //Rule 6 : Tying to persist a user with an already taken login
+        // Rule 5 : Login already used
         user = getPassingUser();
-        try{
-            user = ServiceToTest.createUser(user);
-        } catch(RollbackException e){
-            //ignore, this exception is expected.
-        }
-        Assert.assertEquals("Should not be able to create a user with an already used login", user.getId(), 0);
+        user = ServiceToTest.createUser(user);
+        Assert.assertTrue("Should not be able to create a user with an already used login",user.getId() == 0);
+  
         
+        //User u = Mockito.mock(User.class);
+        //Mockito.when(u.getRole()).thenReturn(User.Role.CONSULTANT);
+        //Mockito.when(u.getRole()).thenReturn(User.Role.ADMIN);
         
-        User u = Mockito.mock(User.class);
-        Mockito.when(u.getRole()).thenReturn(User.Role.CONSULTANT);
-        
-        Mockito.when(u.getRole()).thenReturn(User.Role.ADMIN);
-        
-    }        
+    }  
+    
+    /**
+     * Verify that the {@link ServiceToTest#testCreateClient(fr.astek.internal.bean.User)} method behave properly
+     * <ul>
+     * <li>rule 1 : The returned {@link User#getId()} != 0 if the creation is successfull</li>
+     * <li>rule 2 : The {@link Client} parameter can't be null</li>
+     * <li>rule 3 : The {@link Client#getSiret()} verifies [0-9]{14}</li>
+     * <li>rule 4 : The {@link Client#getRaisonSociale()} verifies ^[a-zA-Z0-9 _-éèà']{3,32}$</li>
+     * <li>rule 5 : The {@link Client#getRole()} or {@link Client#getRaisonSociale()} can't be null</li>
+     * <li>rule 6 : the creation fails if a {@link Client} with the same {@link Client#getSiret()} already exists</li>
+     * <li>rule 7 : An exception is thrown if the creation fails</li>
+     * </ul>
+     */
     
     @Test
     public void testCreateClient() {
         
-        Client client = new Client();
-        client.setSiret("12345678912345");
-        client.setRaisonSociale("France Telecom");
-        Assert.assertTrue("Un client valide n'a pas pu être crée", ServiceToTest.createClient(client));
+        // Rule 1 : Return the client Id if the creation is successfull id != 0  
+        Client client = getPassingClient();
+        client = ServiceToTest.createClient(client);
+        Assert.assertNotNull("ServiceToTest.createClient with a valid client should create and return the client", client);
+        Assert.assertNotNull("ServiceToTest.createClient with a valid client should return a client.getId() != 0", client.getId());
         
-        //Création client avec une raison sociale non valide
-        Client badClient = new Client();
-        badClient.setSiret("12345678912345");
-        badClient.setRaisonSociale("FT");
-        Assert.assertFalse("Un client avec une raison sociale non valide a été crée", ServiceToTest.createClient(badClient));
+        // Rule 2 : Client parameter null
+        client = null;
+        try {
+            client = ServiceToTest.createClient(client);
+        } catch(NullPointerException e){
+            //ignore, this exception is expected.
+        }
+        Assert.assertNull("Client parameter is null", client);
+               
+        // Rule 3 : Client.getSiret not matching [0-9]{14}
+        client = getPassingClient();
+        client.setSiret("zeffrfre87r8e7fverf4");
+        client = ServiceToTest.createClient(client);
+        Assert.assertTrue("Not matching Client.getSiret", client.getId() == 0);
         
-        //Création d'un client vide
-        Client emptyClient = new Client();
-        Assert.assertFalse("Un client vide a été crée", ServiceToTest.createClient(emptyClient));
+        // Rule 4 : Client.getRaisonSociale not matching ^[a-zA-Z0-9 _-éèà']{3,32}$
+        client = getPassingClient();
+        client.setRaisonSociale("FT");
+        try {
+            client = ServiceToTest.createClient(client);
+        } catch(IllegalArgumentException e){
+            //ignore, this exception is expected.
+        }
+        Assert.assertTrue("Not matching Client.getRaisonSociale", client.getId() == 0);
         
+        // Rule 5 : Client.getRaisonSociale is null
+        client = getPassingClient();
+        client.setRaisonSociale(null);
+        try {
+            client = ServiceToTest.createClient(client);
+        } catch(NullPointerException e){
+            //ignore, this exception is expected.
+        }
+        Assert.assertTrue("Client.getRaisonSociale is null", client.getId() == 0);
+        
+        // Rule 6 : Client.getSiret is null
+        client = getPassingClient();
+        client.setSiret(null);
+        try {
+            client = ServiceToTest.createClient(client);
+        } catch(NullPointerException e){
+            //ignore, this exception is expected.
+        }
+        Assert.assertTrue("Client.getSiret is null", client.getId() == 0);
+        
+        // Rule 7 : Client.getSiret already used
+        client = getPassingClient();
+        client = ServiceToTest.createClient(client);
+        Assert.assertTrue("Client.getSiret already used", client.getId() == 0);
+ 
     }
-    @Test
-    public void testGenerateInvoice() throws TechnicalException {
     
-        //Création d'un utilisateur valide
-        User user = new User();
+    /**
+     * Verify that the {@link ServiceToTest#testGenerateInvoice(fr.astek.internal.bean.User, @literal Collection<fr.astek.internal.bean.Client>)} method behave properly
+     * <ul>
+     * <li>rule 1 : Return ..... TODO</li>
+     * <li>rule 2 : The {@link User} parameter not null</li>
+     * <li>rule 3 : The {@link User#getRole() } can't be null</li>
+     * <li>rule 4 : The {@link User#getRole() } must be User.Role.ADMIN</li>
+     * <li>rule 5 : The {@literal Collection<{@link Client}>} not null</li>
+     * <li>rule 6 : The {@literal Collection<{@link Client}>} not empty</li>
+     * <li>rule ... : TO complete</li>
+     * </ul>
+     */
+    @Test
+    public void testGenerateInvoice() throws TechnicalException, BusinessException {
+        
+        Collection<String> result = new ArrayList<>();
+        
+        //Cas passant 
+        
+        //Creating a valid user
+        User user = ServiceTest.getPassingUser();
         user.setLogin("dlebert");
         user.setRole(User.Role.ADMIN);
         ServiceToTest.createUser(user);
         
-        //Création de la liste clients
+        //Creating a valid Client list
         
         Collection<Client> clients = new ArrayList();
         
@@ -145,28 +228,68 @@ public class ServiceTest {
         
         clients.add(ft);
  
-        Achat achatFt = new Achat();
+        Orders achatFt = new Orders();
         achatFt.setIdClient(ft.getId());
-        achatFt.setProduit("Logiciel");
-        achatFt.setPrixUnitaire(new Double(350.25));
-        achatFt.setQuantite(3);
-        ServiceToTest.createAchat(achatFt);
-        
-        Client clientNonEnregistre = new Client();
-        clientNonEnregistre.setSiret("12345678912345");
-        clientNonEnregistre.setRaisonSociale("Client non enregistré");
-        
-        clients.add(clientNonEnregistre);
-        
-        Client clientSansAchat = new Client();
-        clientSansAchat.setSiret("12345678912345");
-        clientSansAchat.setRaisonSociale("CLIENT sans achat");
-        ServiceToTest.createClient(clientSansAchat);
-        
-        clients.add(clientSansAchat);
+        achatFt.setProduct("Logiciel");
+        achatFt.setPrice(new Double(350.25));
+        achatFt.setQuantity(3);
+        ServiceToTest.createOrder(achatFt);
        
-        ServiceToTest.generateInvoices(user, clients);
-   
+        result = ServiceToTest.generateInvoices(user, clients);
+        
+        //TODO ASSERT
+        
+        // Rule 2 : user parameter not null
+        result = new ArrayList<>();
+        user = null;
+        try{
+            result = ServiceToTest.generateInvoices(user, clients);
+        } catch (NullPointerException e){
+            //Expected exception
+        }
+        Assert.assertTrue("ServiceToTest.generateInvoices with parameter User null return nothing", result.isEmpty());
+        
+        // Rule 3 : User.getRole is null
+        result = new ArrayList<>();
+        user = getPassingUser();
+        user.setRole(null);
+        try{
+            result = ServiceToTest.generateInvoices(user, clients);
+        } catch (NullPointerException e){
+            //Expected exception
+        }
+        Assert.assertTrue("ServiceToTest.generateInvoices with parameter User.getRole null should return nothing", result.isEmpty());
+        
+        // Rule 4 : User.getRole not User.Role.ADMIN
+        result = new ArrayList<>();
+        user = getPassingUser();
+        user.setRole(User.Role.CONSULTANT);
+        try{
+            result = ServiceToTest.generateInvoices(user, clients);
+        } catch (IllegalArgumentException e){
+            //Expected exception
+        }
+        Assert.assertTrue("ServiceToTest.generateInvoices with parameter User.getRole not User.Role.ADMIN should return nothing", result.isEmpty());
+        
+        // Rule 5 : clients parameter null
+        user = getPassingUser();
+        clients = null;
+        try{
+            result = ServiceToTest.generateInvoices(user, clients);
+        } catch (NullPointerException e){
+            //Expected exception
+        }
+        Assert.assertTrue("ServiceToTest.generateInvoices with parameter clients null should return nothing", result.isEmpty());
+        
+        // Rule 6 : clients parameter empty
+        user = getPassingUser();
+        clients = new ArrayList();
+        try{
+            result = ServiceToTest.generateInvoices(user, clients);
+        } catch (IllegalArgumentException e){
+            //Expected exception
+        }
+        Assert.assertTrue("ServiceToTest.generateInvoices with parameter clients empty should return nothing", result.isEmpty());
+
     }
-    
 }

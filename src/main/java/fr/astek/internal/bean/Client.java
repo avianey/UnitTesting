@@ -9,6 +9,8 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.Pattern;
 import org.hibernate.annotations.GenericGenerator;
 
@@ -17,6 +19,11 @@ import org.hibernate.annotations.GenericGenerator;
  * @author dlebert
  */
 @Entity
+@Table(
+    uniqueConstraints = {
+        @UniqueConstraint(columnNames={"siret"})
+    }
+)
 public class Client implements Serializable {
     
     @Id
