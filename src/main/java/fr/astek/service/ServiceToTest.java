@@ -31,7 +31,7 @@ import javax.persistence.RollbackException;
  */
 public class ServiceToTest {
     
-    public static EntityManagerFactory EMF = Persistence.createEntityManagerFactory("pu");
+    private static EntityManagerFactory EMF = Persistence.createEntityManagerFactory("pu");
     
     /**
      * Create a new {@link User} and return the saved instance with his id
@@ -110,6 +110,11 @@ public class ServiceToTest {
     public static Orders createOrder(Orders order) {
         
         //TODO Preconditions
+        Preconditions.checkNotNull(order, "servicetotest.createOrder.order.null");
+        Preconditions.checkNotNull(order.getProduct(), "servicetotest.createOrder.order.getProduct().null");
+        Preconditions.checkArgument(order.getQuantity() > 0, "servicetotest.createOrder.order.getQuantity() < 0");
+        Preconditions.checkArgument(order.getPrice() > 0, "servicetotest.createOrder.order.getPrice() < 0");
+        Preconditions.checkArgument(order.getProduct().matches("^[a-zA-Z0-9 _-éèà']{3,32}$"));
         
         EntityManager em = EMF.createEntityManager();
         em.getTransaction().begin();
@@ -154,7 +159,7 @@ public class ServiceToTest {
             // Current Client 
                 // register in database
             if (em.find(Client.class, curClient.getId()) == null){
-                throw new BusinessException("Le client \"" + curClient.getRaisonSociale() + "\" n'existe pas.");
+                continue;
             }
                        
             // Retrieving orders from current client
@@ -164,7 +169,7 @@ public class ServiceToTest {
             
             // No order from this client
             if (orders.isEmpty()){
-                throw new BusinessException("Client \"" + curClient.getRaisonSociale() + "\" has no order registered in database");
+                continue;
             }
 
             Path filePath = Paths.get("Invoice-" + curClient.getRaisonSociale() + ".txt");
@@ -186,12 +191,10 @@ public class ServiceToTest {
                 //Writes headers
                 String header = "Facture pour " + curClient.getRaisonSociale() ;
                 writer.write(header + System.lineSeparator() + System.lineSeparator());
-                logs.add("\tAdding header : " + header);
                 for (Orders order : orders){
                     //  Writes order lines
                     String line = order.getProduct() + " x " + order.getQuantity() + " = "  + (order.getPrice()*order.getQuantity() + " Euros");
                     writer.write("\t" + line + System.lineSeparator());
-                    logs.add("\tAdding line : " + line);
                 }   
             } catch(Exception e) {
                 throw new TechnicalException(e);

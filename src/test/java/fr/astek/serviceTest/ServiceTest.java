@@ -42,6 +42,13 @@ public class ServiceTest {
         return client;
     }
     
+    private static final Client mockClientWithOrder( long idClientWithOrder, String clientName) {
+        Client client = Mockito.mock(Client.class);
+        Mockito.when(client.getId()).thenReturn(idClientWithOrder);
+        Mockito.when(client.getRaisonSociale()).thenReturn(clientName);
+        return client;
+    }
+    
     /**
      * Verify that the {@link ServiceToTest#createUser(fr.astek.internal.bean.User)} method behave properly
      * <ul>
@@ -213,7 +220,8 @@ public class ServiceTest {
      * <li>rule 4 : The {@link User#getRole() } must be User.Role.ADMIN</li>
      * <li>rule 5 : The {@literal Collection<{@link Client}>} not null</li>
      * <li>rule 6 : The {@literal Collection<{@link Client}>} not empty</li>
-     * <li>rule ... : TO complete</li>
+     * <li>rule 7 : A {@link Client } not registered in database</li>
+     * <li>rule 8 : A {@link Client } with no orders should not be created</li>
      * </ul>
      */
     @Test
@@ -223,33 +231,50 @@ public class ServiceTest {
         
         //Cas passant 
         
-        //Creating a valid user
-        User user = ServiceTest.getPassingUser();
-        user.setLogin("dlebert");
-        user.setRole(User.Role.ADMIN);
-        ServiceToTest.createUser(user);
-        
+        //Mocking a valid user
+        User user = Mockito.mock(User.class);
+        Mockito.when(user.getLogin()).thenReturn("dlebert");
+        Mockito.when(user.getRole()).thenReturn(User.Role.ADMIN);
+ 
         //Creating a valid Client list
-        
         Collection<Client> clients = new ArrayList();
         
         Client ft = new Client();
         ft.setSiret("11111111111111");
         ft.setRaisonSociale("France Telecom");
         ServiceToTest.createClient(ft);
-        
         clients.add(ft);
- 
+        
+        //Fake client pointing to ft.getId()
+        for (int i=1; i<5; i++){
+            Client client = ServiceTest.mockClientWithOrder(ft.getId(), "Client"+i);
+            clients.add(client);
+        }
+        
+        //Assigning orders to Client ft
         Orders achatFt = new Orders();
         achatFt.setIdClient(ft.getId());
-        achatFt.setProduct("Logiciel");
+        achatFt.setProduct("Software");
         achatFt.setPrice(new Double(350.25));
         achatFt.setQuantity(3);
         ServiceToTest.createOrder(achatFt);
-       
+        
+        achatFt = new Orders();
+        achatFt.setIdClient(ft.getId());
+        achatFt.setProduct("Hardware");
+        achatFt.setPrice(new Double(354));
+        achatFt.setQuantity(3);
+        ServiceToTest.createOrder(achatFt);
+        
+        achatFt = new Orders();
+        achatFt.setIdClient(ft.getId());
+        achatFt.setProduct("MOA");
+        achatFt.setPrice(new Double(1337.25));
+        achatFt.setQuantity(3);
+        ServiceToTest.createOrder(achatFt);
+
         result = ServiceToTest.generateInvoices(user, clients);
         
-        //TODO ASSERT
         Assert.assertFalse("ServiceToTest.generateInvoices successfull should return a result not empty", result.isEmpty());
         
         // Rule 2 : user parameter not null
@@ -304,34 +329,40 @@ public class ServiceTest {
         }
         Assert.assertTrue("ServiceToTest.generateInvoices with parameter clients empty should return nothing", result.isEmpty());
 
-        // Rule 6 : client not registered in database
+        // Rule 7 : client not registered in database
+        
         user = getPassingUser();
         clients = new ArrayList();
+        Client test = ServiceTest.mockClientWithOrder(ft.getId(), "clientBeforeClientWithoutNotInDatabese");
+        clients.add(test);
         Client client = ServiceTest.getPassingClient();
         clients.add(client);
-        try{
-            result = ServiceToTest.generateInvoices(user, clients);
-        } catch (BusinessException e){
-            //Expected exception
-        }
-        Assert.assertTrue("ServiceToTest.generateInvoices with parameter clients empty should return nothing", result.isEmpty());
+        test = ServiceTest.mockClientWithOrder(ft.getId(), "clientAfterClientWithoutNotInDatabese");
+        clients.add(test);
 
-        // Rule 7 : client with no orders
+        result = ServiceToTest.generateInvoices(user, clients);
+        Assert.assertTrue("ServiceToTest.generateInvoices with parameter clients empty should return nothing", result.size()==2);
+
+        // Rule 8 : client with no orders
         user = getPassingUser();
         clients = new ArrayList();
+        
+        test = ServiceTest.mockClientWithOrder(ft.getId(), "clientBeforeClientWithoutOrder");
+        clients.add(test);
+        
         client = ServiceTest.getPassingClient();
         client.setRaisonSociale("Client without order");
         client.setSiret("12121212121221");
         client = ServiceToTest.createClient(client);
-        
         clients.add(client);
+        
+        test = ServiceTest.mockClientWithOrder(ft.getId(), "clientAfterClientWithoutOreder");
+        clients.add(test);
         try{
             result = ServiceToTest.generateInvoices(user, clients);
         } catch (BusinessException e){
             //Expected exception
         }
-        Assert.assertTrue("ServiceToTest.generateInvoices with parameter clients empty should return nothing", result.isEmpty());
-
-        
+        Assert.assertTrue("ServiceToTest.generateInvoices with parameter clients empty should return nothing", result.size()==2); 
     }
 }
