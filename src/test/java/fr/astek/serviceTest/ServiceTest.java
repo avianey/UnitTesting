@@ -15,13 +15,10 @@ import fr.astek.service.ServiceToTest;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import org.jboss.byteman.contrib.bmunit.BMRule;
-import org.jboss.byteman.contrib.bmunit.BMUnitRunner;
 
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
 /**
@@ -29,7 +26,7 @@ import org.mockito.Mockito;
  * @author dlebert
  */
 
-@RunWith(BMUnitRunner.class)
+
 public class ServiceTest {
 
     private static  User getPassingUser() {
@@ -368,67 +365,4 @@ public class ServiceTest {
         }
         Assert.assertTrue("ServiceToTest.generateInvoices with parameter clients empty should return nothing", result.size()==2); 
     }
-   
-    
-    @BMRule(name="throw IOException",
-            targetClass = "java.nio.file.Files",
-            targetMethod = "newBufferedWriter",
-            action = "throw new java.io.IOException()")
-    @Test
-    public void testGenerateInvoiceIOException() throws TechnicalException, BusinessException {
-        
-        Collection<String> result = new ArrayList<>();
-        
-        //Cas passant 
-        //Mocking a valid user
-        User user = Mockito.mock(User.class);
-        Mockito.when(user.getLogin()).thenReturn("dlebert");
-        Mockito.when(user.getRole()).thenReturn(User.Role.ADMIN);
- 
-        //Creating a valid Client list
-        Collection<Client> clients = new ArrayList();
-        
-        Client ft = new Client();
-        ft.setSiret("11111122111111");
-        ft.setRaisonSociale("Google");
-        ServiceToTest.createClient(ft);
-        clients.add(ft);
-        
-        //Fake client pointing to ft.getId()
-        for (int i=1; i<5; i++){
-            Client client = ServiceTest.mockClientWithOrder(ft.getId(), "Client"+i);
-            clients.add(client);
-        }
-        
-        //Assigning orders to Client ft
-        Orders achatFt = new Orders();
-        achatFt.setIdClient(ft.getId());
-        achatFt.setProduct("Software");
-        achatFt.setPrice(new Double(350.25));
-        achatFt.setQuantity(3);
-        ServiceToTest.createOrder(achatFt);
-        
-        achatFt = new Orders();
-        achatFt.setIdClient(ft.getId());
-        achatFt.setProduct("Hardware");
-        achatFt.setPrice(new Double(354));
-        achatFt.setQuantity(3);
-        ServiceToTest.createOrder(achatFt);
-        
-        achatFt = new Orders();
-        achatFt.setIdClient(ft.getId());
-        achatFt.setProduct("MOA");
-        achatFt.setPrice(new Double(1337.25));
-        achatFt.setQuantity(3);
-        ServiceToTest.createOrder(achatFt);
-        
-        try {
-            result = ServiceToTest.generateInvoices(user, clients);
-        } catch (TechnicalException e) {
-            // Expected exception
-        }
-        Assert.assertTrue("ServiceToTest.generateInvoices successfull should return a result not empty", result.isEmpty());
-  
-    }
-
 }
