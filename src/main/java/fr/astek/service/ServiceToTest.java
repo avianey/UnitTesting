@@ -180,6 +180,7 @@ public class ServiceToTest {
                     Files.createFile(filePath);
                     logs.add(filePath.toAbsolutePath() + " created");
                 } catch (IOException e) {
+                    logs.clear();
                     throw new TechnicalException(e);
                 }
             } else {
@@ -197,6 +198,7 @@ public class ServiceToTest {
                     writer.write("\t" + line + System.lineSeparator());
                 }   
             } catch(Exception e) {
+                logs.clear();
                 throw new TechnicalException(e);
             }
         } 
