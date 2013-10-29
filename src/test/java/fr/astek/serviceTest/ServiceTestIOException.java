@@ -25,9 +25,6 @@ import org.mockito.Mockito;
 @RunWith(BMUnitRunner.class)
 public class ServiceTestIOException {
     
-    
-    
-    
     /**
      * Verify that the {@link ServiceToTest#generateInvoices(fr.astek.internal.bean.User, java.util.Collection)} method behave properly
      * when an IOException is thrown
@@ -94,8 +91,5 @@ public class ServiceTestIOException {
             // Expected exception
         }
         Assert.assertTrue("ServiceToTest.generateInvoices throwing an exception should return an empty result", result.isEmpty());
-  
     }
-    
-    
 }
