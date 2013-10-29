@@ -38,7 +38,7 @@ public class ServiceTest {
     private static final Client getPassingClient() {
         Client client = new Client();
         client.setSiret("12345678912345");
-        client.setRaisonSociale("France Telecom");
+        client.setRaisonSociale("Test client");
         return client;
     }
     
@@ -53,7 +53,7 @@ public class ServiceTest {
      * </ul>
      */
     @Test
-    public void testCreateUser() {
+    public void testCreateUser() throws BusinessException {
         
         // Rule 1 : Successfull creation return an id > 0
         User user = getPassingUser();
@@ -108,7 +108,11 @@ public class ServiceTest {
 
         // Rule 5 : Login already used
         user = getPassingUser();
-        user = ServiceToTest.createUser(user);
+        try {
+            user = ServiceToTest.createUser(user);
+        } catch(BusinessException e){
+            //ignore, this exception is expected.
+        }
         Assert.assertTrue("Should not be able to create a user with an already used login",user.getId() == 0);
   
         
@@ -132,9 +136,9 @@ public class ServiceTest {
      */
     
     @Test
-    public void testCreateClient() {
+    public void testCreateClient() throws BusinessException {
         
-        // Rule 1 : Return the client Id if the creation is successfull id != 0  
+        // Rule 1 : Creation successfull id != 0  
         Client client = getPassingClient();
         client = ServiceToTest.createClient(client);
         Assert.assertNotNull("ServiceToTest.createClient with a valid client should create and return the client", client);
@@ -152,7 +156,11 @@ public class ServiceTest {
         // Rule 3 : Client.getSiret not matching [0-9]{14}
         client = getPassingClient();
         client.setSiret("zeffrfre87r8e7fverf4");
-        client = ServiceToTest.createClient(client);
+        try {
+            client = ServiceToTest.createClient(client);
+        } catch(BusinessException e){
+            //ignore, this exception is expected.
+        }
         Assert.assertTrue("Not matching Client.getSiret", client.getId() == 0);
         
         // Rule 4 : Client.getRaisonSociale not matching ^[a-zA-Z0-9 _-éèà']{3,32}$
@@ -187,7 +195,11 @@ public class ServiceTest {
         
         // Rule 7 : Client.getSiret already used
         client = getPassingClient();
-        client = ServiceToTest.createClient(client);
+        try {
+            client = ServiceToTest.createClient(client);
+        } catch(BusinessException e){
+            //ignore, this exception is expected.
+        }
         Assert.assertTrue("Client.getSiret already used", client.getId() == 0);
  
     }
@@ -222,7 +234,7 @@ public class ServiceTest {
         Collection<Client> clients = new ArrayList();
         
         Client ft = new Client();
-        ft.setSiret("12345678912345");
+        ft.setSiret("11111111111111");
         ft.setRaisonSociale("France Telecom");
         ServiceToTest.createClient(ft);
         
@@ -238,6 +250,7 @@ public class ServiceTest {
         result = ServiceToTest.generateInvoices(user, clients);
         
         //TODO ASSERT
+        Assert.assertFalse("ServiceToTest.generateInvoices successfull should return a result not empty", result.isEmpty());
         
         // Rule 2 : user parameter not null
         result = new ArrayList<>();
@@ -291,5 +304,34 @@ public class ServiceTest {
         }
         Assert.assertTrue("ServiceToTest.generateInvoices with parameter clients empty should return nothing", result.isEmpty());
 
+        // Rule 6 : client not registered in database
+        user = getPassingUser();
+        clients = new ArrayList();
+        Client client = ServiceTest.getPassingClient();
+        clients.add(client);
+        try{
+            result = ServiceToTest.generateInvoices(user, clients);
+        } catch (BusinessException e){
+            //Expected exception
+        }
+        Assert.assertTrue("ServiceToTest.generateInvoices with parameter clients empty should return nothing", result.isEmpty());
+
+        // Rule 7 : client with no orders
+        user = getPassingUser();
+        clients = new ArrayList();
+        client = ServiceTest.getPassingClient();
+        client.setRaisonSociale("Client without order");
+        client.setSiret("12121212121221");
+        client = ServiceToTest.createClient(client);
+        
+        clients.add(client);
+        try{
+            result = ServiceToTest.generateInvoices(user, clients);
+        } catch (BusinessException e){
+            //Expected exception
+        }
+        Assert.assertTrue("ServiceToTest.generateInvoices with parameter clients empty should return nothing", result.isEmpty());
+
+        
     }
 }

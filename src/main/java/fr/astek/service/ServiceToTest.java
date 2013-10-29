@@ -31,7 +31,7 @@ import javax.persistence.RollbackException;
  */
 public class ServiceToTest {
     
-    private static EntityManagerFactory EMF = Persistence.createEntityManagerFactory("pu");
+    public static EntityManagerFactory EMF = Persistence.createEntityManagerFactory("pu");
     
     /**
      * Create a new {@link User} and return the saved instance with his id
@@ -42,7 +42,7 @@ public class ServiceToTest {
      * @return the persisted user
      */
     
-    public static User createUser(User user) {
+    public static User createUser(User user) throws BusinessException {
         
         // Preconditions
         Preconditions.checkNotNull(user, "servicetotest.createuser.user.null");
@@ -60,10 +60,8 @@ public class ServiceToTest {
             //rollback changes if an exception occured
             em.getTransaction().begin();
             em.getTransaction().rollback();
-            //Making sure that the user was not persisted
-            if (em.find(User.class, user.getId()) == null){
-                user.setId(0);
-            }
+            user.setId(0);
+            throw new BusinessException("User \"" + user.getLogin() + "\"couldn't be created. Constraint error");
         }
         return user;
     }
@@ -77,7 +75,7 @@ public class ServiceToTest {
      * @return the persisted client
      */
     
-    public static Client createClient(Client client) {
+    public static Client createClient(Client client) throws BusinessException {
         
         Preconditions.checkNotNull(client, "servicetotest.createclient.client.null");
         Preconditions.checkNotNull(client.getSiret(), "servicetotest.createclient.user.getSiret().null");
@@ -92,14 +90,10 @@ public class ServiceToTest {
         } catch(RollbackException e){
             //rollback changes if an exception occured
             em.getTransaction().begin();
-            em.getTransaction().rollback();
-            //Making sure that the client was not persisted
-            if (em.find(Client.class, client.getId()) == null){
-                client.setId(0);
-            }
+            em.getTransaction().rollback();        
+            client.setId(0);
+            throw new BusinessException("Client \"" + client.getRaisonSociale() + "\" couldn't be created. Constraint error");
         }
-        
- 
         return client;
     }
     
@@ -107,7 +101,7 @@ public class ServiceToTest {
      * Create a new {@link Orders} and return the saved instance with his id
      * @param order
      *          the <b>not null</b> {@link Orders} to persist
-     *          the <b>unique, not null</b> {@link Orders#getProduct()} must match "[0-9]{14}"
+     *          the <b>unique, not null</b> {@link Orders#getProduct()} must match ""
      *          the <b>not null</b> {@link Orders#getQuantity()} must be > 0
      *          the <b>not null</b> {@link Orders#getPrice()}must be > 0
      * @return the persisted client
@@ -125,14 +119,13 @@ public class ServiceToTest {
         return order;
     }
     
-    
     /**
      * 
      * @param currentUser
      * @param clients
      *          the <b>not null, connected, admin</b> {@link User} 
      *          the <b>not null, not empty</b> List of client"
-     * @return Log of action performed
+     * @return Actions performed logs
      * @throws TechnicalException, BusinessException 
      */
     public static Collection<String> generateInvoices(User currentUser, Collection<Client> clients) 
@@ -140,9 +133,8 @@ public class ServiceToTest {
         
         Collection<String> logs = new ArrayList<>();
         EntityManager em = EMF.createEntityManager();
-        
+       
         // Préconditions
-
         // User 
             // Not null 
         Preconditions.checkNotNull(currentUser, "ServiceToTest.generateInvoices.currentUser.null");
@@ -160,23 +152,19 @@ public class ServiceToTest {
         for (Client curClient : clients) {
 
             // Current Client 
-                // .getId() not null
-            Preconditions.checkNotNull(curClient.getId(), 
-                        "ServiceToTest.generateInvoices.curClient.getId().null");
                 // register in database
             if (em.find(Client.class, curClient.getId()) == null){
-                throw new BusinessException("Le client " + curClient.getRaisonSociale() + " n'existe pas.");
+                throw new BusinessException("Le client \"" + curClient.getRaisonSociale() + "\" n'existe pas.");
             }
                        
-            // Retrieving orders from curClient
-
-            Query query = em.createQuery("from Orders o  where o.idClient = :idClient");
+            // Retrieving orders from current client
+            Query query = em.createQuery("from Orders o where o.idClient = :idClient");
             query.setParameter("idClient", curClient.getId());
             List<Orders> orders = query.getResultList();       
             
             // No order from this client
             if (orders.isEmpty()){
-                throw new BusinessException("Le client " + curClient.getRaisonSociale() + " passé en paramètre n'a effectué aucuns achat");
+                throw new BusinessException("Client \"" + curClient.getRaisonSociale() + "\" has no order registered in database");
             }
 
             Path filePath = Paths.get("Invoice-" + curClient.getRaisonSociale() + ".txt");
