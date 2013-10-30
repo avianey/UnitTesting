@@ -51,8 +51,7 @@ public class ServiceTestWithParameters {
         order.setQuantity(quantity);
         order.setPrice(price);
         ServiceToTest.createOrder(order);
-	   System.out.println("id : " + order.getId());
-           Assert.assertTrue(order.getId() > 0);
+        Assert.assertTrue(order.getId() > 0);
     }
 
 }

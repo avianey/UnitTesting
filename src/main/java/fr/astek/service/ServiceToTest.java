@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.FlushModeType;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
 import javax.persistence.RollbackException;
@@ -54,15 +55,7 @@ public class ServiceToTest {
         EntityManager em = EMF.createEntityManager();
         em.getTransaction().begin();
         em.persist(user);
-        try {
-            em.getTransaction().commit();
-        } catch(RollbackException e){
-            //rollback changes if an exception occured
-            em.getTransaction().begin();
-            em.getTransaction().rollback();
-            user.setId(0);
-            throw new BusinessException("User \"" + user.getLogin() + "\"couldn't be created. Constraint error");
-        }
+        em.getTransaction().commit();
         return user;
     }
     
@@ -85,15 +78,7 @@ public class ServiceToTest {
         EntityManager em = EMF.createEntityManager();
         em.getTransaction().begin();
         em.persist(client);
-        try {
-            em.getTransaction().commit();
-        } catch(RollbackException e){
-            //rollback changes if an exception occured
-            em.getTransaction().begin();
-            em.getTransaction().rollback();        
-            client.setId(0);
-            throw new BusinessException("Client \"" + client.getRaisonSociale() + "\" couldn't be created. Constraint error");
-        }
+        em.getTransaction().commit();
         return client;
     }
     

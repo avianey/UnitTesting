@@ -15,6 +15,7 @@ import fr.astek.service.ServiceToTest;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import javax.persistence.RollbackException;
 
 
 import org.junit.Assert;
@@ -118,15 +119,11 @@ public class ServiceTest {
         user = getPassingUser();
         try {
             user = ServiceToTest.createUser(user);
-        } catch(BusinessException e){
+        } catch(RollbackException e){
             //ignore, this exception is expected.
+            user.setId(0);
         }
         Assert.assertTrue("Should not be able to create a user with an already used login",user.getId() == 0);
-  
-        
-        //User u = Mockito.mock(User.class);
-        //Mockito.when(u.getRole()).thenReturn(User.Role.CONSULTANT);
-        //Mockito.when(u.getRole()).thenReturn(User.Role.ADMIN);
         
     }  
     
@@ -166,8 +163,9 @@ public class ServiceTest {
         client.setSiret("zeffrfre87r8e7fverf4");
         try {
             client = ServiceToTest.createClient(client);
-        } catch(BusinessException e){
+        } catch(RollbackException e){
             //ignore, this exception is expected.
+            client.setId(0);
         }
         Assert.assertTrue("Not matching Client.getSiret", client.getId() == 0);
         
@@ -205,11 +203,10 @@ public class ServiceTest {
         client = getPassingClient();
         try {
             client = ServiceToTest.createClient(client);
-        } catch(BusinessException e){
-            //ignore, this exception is expected.
+        } catch(RollbackException e){
+            client.setId(0);
         }
         Assert.assertTrue("Client.getSiret already used", client.getId() == 0);
- 
     }
     
     /**
