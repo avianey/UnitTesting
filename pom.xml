@@ -49,9 +49,21 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>pl.pragmatists</groupId>
+            <artifactId>JUnitParams</artifactId>
+            <version>1.0.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
+            <artifactId>mockito-core</artifactId>  
             <version>1.9.5</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jooq</groupId>
+            <artifactId>joor</artifactId>
+            <version>0.9.3</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -82,6 +94,7 @@
 
     <build>
         <plugins>
+            
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -89,26 +102,29 @@
                 <configuration>
                     <source>1.7</source>
                     <target>1.7</target>
+                    <!-- 
                     <verbose>true</verbose>
                     <fork>true</fork>
-                    <!-- JAVA_7_HOME must be set in system var -->
                     <executable>${env.JAVA_7_HOME}/bin/javac</executable>
                     <compilerVersion>1.7</compilerVersion>
+                    -->
                 </configuration>
             </plugin>
+            
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>cobertura-maven-plugin</artifactId>
                 <version>2.6</version>
             </plugin>
+            
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.4.3</version>
                 <configuration>
-                    <includes>
+                    <!-- <includes>
                         <include>fr/astek/serviceTest/ServiceTest*.java</include>
-                    </includes>
+                    </includes> -->
                     <!-- make sure maven puts the byteman jar in the classpath rather than in a manifest jar -->
                     <useManifestOnlyJar>false</useManifestOnlyJar>
                     <forkMode>once</forkMode>
@@ -125,6 +141,7 @@
                     </systemProperties>
                 </configuration>
             </plugin>
+            
         </plugins>
     </build>
 </project>
