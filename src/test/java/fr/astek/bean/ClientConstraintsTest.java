@@ -17,16 +17,21 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 import fr.astek.service.Service;
-import fr.astek.test.AbstractTest;
+import fr.astek.test.AbstractBeforeClassTest;
 
 /**
  * Illustrates the use of a Parameterized {@link Test} to check javax.validation constraints on the {@link Client} bean.
+ * Illustrates the use of :
+ * <ul>
+ * <li><a href="https://code.google.com/p/mockito/">Mockito</a> : simpler & better mocking</li>
+ * <li><a href="https://code.google.com/p/joor/">JOOR</a> : a fluent reflection API for Java</li>
+ * </ul>
  * 
  * @author avianey
  * @version 1
  */
 @RunWith(Parameterized.class)
-public class ClientConstraintsTest extends AbstractTest {
+public class ClientConstraintsTest extends AbstractBeforeClassTest {
     
     private static final String UNIQUE_SIRET = "12345678901234";
     
@@ -80,7 +85,7 @@ public class ClientConstraintsTest extends AbstractTest {
                 ConstraintViolationException cve = (ConstraintViolationException) e.getCause();
                 Assert.assertTrue(errorsExpected.size() == cve.getConstraintViolations().size());
                 for (ConstraintViolation<?> cv : cve.getConstraintViolations()) {
-                    Assert.assertTrue("Constrint checked successfully " + cv.getMessage(), errorsExpected.contains(cv.getMessage()));
+                    Assert.assertTrue("Constraint checked successfully " + cv.getMessage(), errorsExpected.contains(cv.getMessage()));
                 }
             } else if (errorsExpected != null) {
                 e.printStackTrace();
@@ -88,4 +93,5 @@ public class ClientConstraintsTest extends AbstractTest {
             }
         }
     }
+    
 }

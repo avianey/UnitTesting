@@ -33,7 +33,7 @@
         <dependency>
             <groupId>org.hsqldb</groupId>
             <artifactId>hsqldb</artifactId>
-            <version>2.0.0</version>
+            <version>2.3.1</version>
         </dependency>
         <dependency>
             <groupId>org.apache.poi</groupId>
@@ -68,6 +68,12 @@
         </dependency>
         <dependency>
             <groupId>org.jboss.byteman</groupId>
+            <artifactId>byteman-bmunit</artifactId>
+            <scope>test</scope>
+            <version>2.1.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.byteman</groupId>
             <artifactId>byteman</artifactId>
             <version>2.1.3</version>
             <scope>test</scope>
@@ -85,10 +91,11 @@
             <version>2.1.3</version>
         </dependency>
         <dependency>
-            <groupId>org.jboss.byteman</groupId>
-            <artifactId>byteman-bmunit</artifactId>
-            <scope>test</scope>
-            <version>2.1.3</version>
+            <groupId>com.sun</groupId>
+            <artifactId>tools</artifactId>
+            <version>1.6</version>
+            <scope>system</scope>
+            <systemPath>${env.JAVA_HOME}/lib/tools.jar</systemPath>
         </dependency>
     </dependencies>
 
@@ -122,9 +129,11 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.4.3</version>
                 <configuration>
-                    <!-- <includes>
-                        <include>fr/astek/serviceTest/ServiceTest*.java</include>
-                    </includes> -->
+                    <includes>
+                        <!-- <include>fr/astek/bean/**</include> -->
+                        <!-- <include>fr/astek/service/ServiceTest.java</include> -->
+                        <include>fr/astek/serviceTest/ServiceTestIOException.java</include>
+                    </includes>
                     <!-- make sure maven puts the byteman jar in the classpath rather than in a manifest jar -->
                     <useManifestOnlyJar>false</useManifestOnlyJar>
                     <forkMode>once</forkMode>
@@ -138,7 +147,14 @@
                             <name>org.jboss.byteman.home</name>
                             <value></value>
                         </property>
+                        <property>
+                            <name>org.jboss.byteman.contrib.bmunit.verbose</name>
+                            <value>true</value>
+                        </property>
                     </systemProperties>
+                    <!-- <systemPropertyVariables>
+                        <org.jboss.byteman.contrib.bmunit.agent.port>0x8fff</org.jboss.byteman.contrib.bmunit.agent.port>
+                    </systemPropertyVariables> -->
                 </configuration>
             </plugin>
             

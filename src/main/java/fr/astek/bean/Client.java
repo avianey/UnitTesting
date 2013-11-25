@@ -15,6 +15,7 @@ import org.hibernate.annotations.GenericGenerator;
 
 @Entity
 @Table(
+    name = "T_CLIENT",
     uniqueConstraints = {
         @UniqueConstraint(columnNames={"siret"})
     }

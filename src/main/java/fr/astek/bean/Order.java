@@ -5,42 +5,55 @@
 package fr.astek.bean;
 
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.Date;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+
 import org.hibernate.annotations.GenericGenerator;
 
 /**
  *
  * @author dlebert
  */
-@Table
+@Table(name = "T_ORDER")
 @Entity
 public class Order implements Serializable  {
+    
+    private static final long serialVersionUID = 1L;
+
+    public static final String ERROR_CLIENT_NULL  = "order.client.null";
+    public static final String ERROR_REF_NULL  = "order.ref.null";
+    public static final String ERROR_PRICE_NEGATIVE  = "order.price.negative";
+    public static final String ERROR_QUANTITY_NEGATIVE  = "order.quantity.negative";
     
     @Id
     @GeneratedValue(generator="increment")
     @GenericGenerator(name="increment", strategy = "increment")
     private long id;
     
-    @Column
-    private long idClient;
+    @ManyToOne
+    @NotNull(message = ERROR_CLIENT_NULL)
+    private Client client;
     
     @Column
-    private String product;
+    @NotNull(message = ERROR_REF_NULL)
+    private String ref;
     
     @Column
+    @Min(value = 1, message = ERROR_QUANTITY_NEGATIVE)
     private int quantity;
     
     @Column
+    @DecimalMin(value = "0.01", message = ERROR_PRICE_NEGATIVE)
     private double price;
     
-
-
     /**
      * @return the id
      */
@@ -53,34 +66,6 @@ public class Order implements Serializable  {
      */
     public void setId(long id) {
         this.id = id;
-    }
-
-    /**
-     * @return the idClient
-     */
-    public long getIdClient() {
-        return idClient;
-    }
-
-    /**
-     * @param idClient the idClient to set
-     */
-    public void setIdClient(long idClient) {
-        this.idClient = idClient;
-    }
-
-    /**
-     * @return the product
-     */
-    public String getProduct() {
-        return product;
-    }
-
-    /**
-     * @param product the product to set
-     */
-    public void setProduct(String product) {
-        this.product = product;
     }
 
     /**
@@ -109,6 +94,34 @@ public class Order implements Serializable  {
      */
     public void setPrice(double price) {
         this.price = price;
+    }
+
+    /**
+     * @return the client
+     */
+    public Client getClient() {
+        return client;
+    }
+
+    /**
+     * @param client the client to set
+     */
+    public void setClient(Client client) {
+        this.client = client;
+    }
+
+    /**
+     * @return the ref
+     */
+    public String getRef() {
+        return ref;
+    }
+
+    /**
+     * @param ref the ref to set
+     */
+    public void setRef(String ref) {
+        this.ref = ref;
     }
 
 }

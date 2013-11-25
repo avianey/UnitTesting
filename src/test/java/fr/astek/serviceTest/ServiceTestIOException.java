@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package fr.astek.service;
+package fr.astek.serviceTest;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -19,6 +19,7 @@ import fr.astek.bean.Order;
 import fr.astek.bean.User;
 import fr.astek.error.BusinessException;
 import fr.astek.error.TechnicalException;
+import fr.astek.service.Service;
 /**
  *
  * @author dlebert
@@ -27,9 +28,9 @@ import fr.astek.error.TechnicalException;
 public class ServiceTestIOException {
     
     /**
-     * Verify that the {@link Service#generateInvoices(fr.astek.bean.User, java.util.Collection)} method behave properly
+     * Verify that the {@link ServiceToTest#generateInvoices(fr.astek.internal.bean.User, java.util.Collection)} method behave properly
      * when an IOException is thrown
-     * Byteman will throw a IOException whenever {@link Service#generateInvoices(fr.astek.bean.User, java.util.Collection)}
+     * Byteman will throw a IOException whenever {@link ServiceToTest#generateInvoices(fr.astek.internal.bean.User, java.util.Collection)}
      * will call the method {@link  java.nio.file.Files#newBufferedWriter}
      */
     
@@ -64,33 +65,5 @@ public class ServiceTestIOException {
             clients.add(client);
         }
         
-        //Assigning orders to Client ft
-        Order orderFt = new Order();
-        orderFt.setIdClient(ft.getId());
-        orderFt.setProduct("Software");
-        orderFt.setPrice(new Double(350.25));
-        orderFt.setQuantity(3);
-        Service.createOrder(orderFt);
-        
-        orderFt = new Order();
-        orderFt.setIdClient(ft.getId());
-        orderFt.setProduct("Hardware");
-        orderFt.setPrice(new Double(354));
-        orderFt.setQuantity(3);
-        Service.createOrder(orderFt);
-        
-        orderFt = new Order();
-        orderFt.setIdClient(ft.getId());
-        orderFt.setProduct("MOA");
-        orderFt.setPrice(new Double(1337.25));
-        orderFt.setQuantity(3);
-        Service.createOrder(orderFt);
-        
-        try {
-            result = Service.generateInvoices(user, clients);
-        } catch (TechnicalException e) {
-            // Expected exception
-        }
-        Assert.assertTrue("ServiceToTest.generateInvoices throwing an exception should return an empty result", result.isEmpty());
     }
 }
