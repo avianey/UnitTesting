@@ -125,7 +125,8 @@ public class Service {
             }
 
             final Path orderPath = Paths.get(
-                    new StringBuilder(client.getSiret())
+                    new StringBuilder("target/")
+                            .append(client.getSiret())
                             .append(new SimpleDateFormat("yyyyddMMHHmmss").format(new Date()))
                             .append(".txt")
                             .toString());

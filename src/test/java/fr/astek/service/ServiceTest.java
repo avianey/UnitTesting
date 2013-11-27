@@ -104,38 +104,26 @@ public class ServiceTest extends AbstractBeforeClassTest {
         
     }
     
-
-    /**
-     * Verify that the {@link Service#generateInvoices(User, com.google.common.collect.ImmutableCollection)} method behave properly when an IOException occurs.<br/>
-     * ByteMan will throw a IOException whenever the {@link  java.nio.file.Files#createFile(java.nio.file.Path, java.nio.file.attribute.FileAttribute...)} method is called.
-     */
+    @Test
     @BMRule(
         name="throw IOException",
         targetClass = "java.nio.file.Files",
         targetMethod = "createFile",
         action = "throw new java.io.IOException()"
     )
-    @Test
     public void testGenerateInvoiceIOException() {
         try {
-
-            Collection<String> result;
+            // wait for byteman agent to connect
+            Thread.sleep(1000);
             User admin = Mockito.mock(User.class);
             Mockito.when(admin.getRole()).thenReturn(User.Role.ADMIN);
             ImmutableList<Client> clients = new ImmutableList.Builder<Client>().add(client).build();
-            
-            /****************
-             * PASSING CASE *
-             ****************/
-            
-            result = Service.generateInvoices(admin, clients);
-            Assert.assertNotNull("No result provided", result);
-            Assert.assertFalse("No INVOICE generated", result.isEmpty());
-            Assert.assertEquals("More than one INVOICE generated", 1, result.size());
+            Service.generateInvoices(admin, clients);
+            Assert.fail("Method returned properly on IOException!!!");
         } catch (TechnicalException e) {
             Assert.assertTrue("IOException not correctly encapsulated", e.getCause() instanceof IOException);
         } catch (Exception e) {
-            Assert.fail("IOException not correctly encapsulated");
+            Assert.fail("IOException not correctly encapsulated : " + e.getCause().getClass().getSimpleName());
             e.printStackTrace();
         }
     }
